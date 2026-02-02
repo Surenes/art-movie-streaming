@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Movie Streaming | Dedicated Server</title>
+    <style>
+        :root {
+            /* Changed to a more "Artistic" gold/teal accent */
+            --accent: #00d4ff; 
+            --bg: #050505;
+            --card: #121212;
+            --text: #ffffff;
+            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-main);
+            margin: 0;
+            padding: 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- BRANDING --- */
+        .header-section { text-align: center; margin-bottom: 25px; }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .logo span {
+            color: var(--accent);
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        .control-panel {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #1a1a1a;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .input-row { display: flex; flex-direction: column; gap: 10px; }
+
+        input {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus { border-color: var(--accent); }
+
+        button {
+            background: var(--accent);
+            color: black;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        button:hover { transform: scale(1.02); opacity: 0.9; }
+
+        #movieSearch { margin-top: 15px; display: none; width: 100%; box-sizing: border-box; }
+
+        /* --- PLAYER INTERFACE --- */
+        #videoBox {
+            display: none;
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid #222;
+        }
+
+        video { width: 100%; aspect-ratio: 16/9; display: block; }
+
+        .player-info { padding: 20px; background: linear-gradient(to bottom, #111, #000); }
+
+        .res-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .res-buttons button {
+            background: rgba(255,255,255,0.05);
+            color: #ccc;
+            font-size: 0.75rem;
+            padding: 8px 18px;
+            flex-shrink: 0;
+            border: 1px solid #333;
+        }
+
+        .res-buttons button.active {
+            background: var(--accent);
+            color: black;
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+
+        /* --- CONTENT GRID --- */
+        .main-content {
+            max-width: 1200px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .list-container {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 10px;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+
+        .movie-card {
+            padding: 16px;
+            border-bottom: 1px solid #1a1a1a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 0.95rem;
+        }
+
+        .movie-card:active { background: #1a1a1a; color: var(--accent); }
+
+        @media (min-width: 900px) {
+            .main-content { grid-template-columns: 1fr 320px; }
+            .input-row { flex-direction: row; }
+            body { padding: 30px; }
+            input#yearInput { width: 160px; }
+        }
+
+        #statusText { color: #555; font-size: 0.8rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-section">
+        <div class="logo">ART <span>Movie Streaming</span></div>
+        <div class="control-panel">
+            <div class="input-row">
+                <input type="number" id="yearInput" value="2024" placeholder="Year">
+                <button onclick="loadYear()">Enter Library</button>
+            </div>
+            <input type="text" id="movieSearch" onkeyup="filterMovies()" placeholder="Search titles...">
+            <div id="statusText">System standby...</div>
+        </div>
+    </div>
+
+    <div id="videoBox">
+        <video id="player" controls playsinline>
+            Your browser does not support video.
+        </video>
+        <div class="player-info">
+            <div id="nowPlaying" style="font-weight: 600; font-size: 1.1rem; color: #fff;"></div>
+            <div class="res-buttons" id="resOptions"></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="list-container">
+            <div id="movieGrid"></div>
+        </div>
+
+        <div id="sidebar" style="background:var(--card); padding:25px; border-radius:20px; border: 1px solid #1a1a1a;">
+            <h4 style="margin:0 0 15px 0; color:var(--accent); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px;">Library Meta</h4>
+            <div id="apiInfo" style="color:#777; font-size: 0.85rem; line-height: 1.6;">Select a film to retrieve metadata.</div>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'L8Cwpcbt6L3MN9jI1PmcytHqMn2AB6fZOkAIhB4y';
+        const BASE_IP = "http://103.145.232.246/Data/movies/Hollywood/";
+        let cachedMovieList = [];
+
+        // --- TITLE CLEANING ENGINE ---
+        function cleanMovieTitle(rawName) {
+            let name = rawName.replace(/\.[^/.]+$/, ""); 
+            const tags = [
+                /\d{4}/g, /1080p/gi, /720p/gi, /480p/gi, /2160p/gi, /4k/gi,
+                /bluray/gi, /hdtv/gi, /webrip/gi, /web-dl/gi, /dd5\.1/gi,
+                /x264/gi, /x265/gi, /h264/gi, /h265/gi, /aac/gi, /dts/gi,
+                /dual-audio/gi, /hindi/gi, /english/gi, /esubs/gi
+            ];
+            tags.forEach(tag => name = name.replace(tag, ""));
+            return name.replace(/[\._]/g, " ").replace(/\s+/g, " ").trim();
+        }
+
+        async function loadYear() {
+            const year = document.getElementById('yearInput').value;
+            const targetUrl = `${BASE_IP}${year}/`;
+            const status = document.getElementById('statusText');
+            status.innerText = "Synchronizing with server...";
+
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                const links = Array.from(doc.querySelectorAll('a'))
+                    .map(a => a.innerText)
+                    .filter(name => !name.includes('../') && !name.toLowerCase().includes('index'));
+
+                cachedMovieList = links;
+                renderList(links, targetUrl);
+                
+                status.innerText = `${links.length} works found in ${year} collection.`;
+                document.getElementById('movieSearch').style.display = "block";
+            } catch (e) {
+                status.innerText = "Connection failure.";
+            }
+        }
+
+        function renderList(list, baseUrl) {
+            const grid = document.getElementById('movieGrid');
+            grid.innerHTML = list.map(name => `
+                <div class="movie-card" onclick="openFolder('${name}', '${baseUrl}${name}/')">
+                    <span style="margin-right:15px; color:var(--accent); font-size:0.7rem;">●</span>
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${name}</span>
+                </div>
+            `).join('');
+        }
+
+        function filterMovies() {
+            const query = document.getElementById('movieSearch').value.toLowerCase();
+            const year = document.getElementById('yearInput').value;
+            const filtered = cachedMovieList.filter(m => m.toLowerCase().includes(query));
+            renderList(filtered, `${BASE_IP}${year}/`);
+        }
+
+        async function openFolder(folderName, folderUrl) {
+            const videoBox = document.getElementById('videoBox');
+            const resOptions = document.getElementById('resOptions');
+            const nowPlaying = document.getElementById('nowPlaying');
+
+            videoBox.style.display = "block";
+            videoBox.scrollIntoView({ behavior: 'smooth' }); 
+            nowPlaying.innerText = "Scanning: " + cleanMovieTitle(folderName);
+            resOptions.innerHTML = "Indexing streams...";
+
+            try {
+                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(folderUrl)}`;
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+                const links = Array.from(doc.querySelectorAll('a'));
+
+                const videoFiles = links.filter(l => {
+                    const h = l.getAttribute('href').toLowerCase();
+                    return h.endsWith('.mp4') || h.endsWith('.mkv');
+                });
+
+                if (videoFiles.length === 0) {
+                    resOptions.innerHTML = "Folder empty.";
+                    return;
+                }
+
+                resOptions.innerHTML = "";
+                let bestFile = null;
+
+                videoFiles.forEach(file => {
+                    const fHref = file.getAttribute('href');
+                    const fName = file.innerText.trim() || fHref;
+                    const btn = document.createElement('button');
+                    
+                    let label = "Stream";
+                    if (fName.includes('1080')) {
+                        label = "FHD 1080p";
+                        if (!bestFile) bestFile = { url: folderUrl + fHref, name: fName, btn: btn };
+                    } else if (fName.includes('720')) {
+                        label = "HD 720p";
+                        if (!bestFile || !bestFile.name.includes('1080')) bestFile = { url: folderUrl + fHref, name: fName, btn: btn };
+                    }
+
+                    btn.innerText = label;
+                    btn.onclick = () => playVideo(folderUrl + fHref, fName, btn);
+                    resOptions.appendChild(btn);
+                });
+
+                if (!bestFile) bestFile = { url: folderUrl + videoFiles[0].getAttribute('href'), name: videoFiles[0].innerText, btn: resOptions.firstChild };
+
+                playVideo(bestFile.url, bestFile.name, bestFile.btn);
+                fetchOfficialData(folderName);
+
+            } catch (e) { resOptions.innerHTML = "Access error."; }
+        }
+
+        function playVideo(url, name, btn) {
+            const player = document.getElementById('player');
+            player.src = url;
+            player.load();
+            player.play();
+            
+            document.querySelectorAll('.res-buttons button').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            
+            document.getElementById('nowPlaying').innerText = "Playing: " + cleanMovieTitle(name);
+        }
+
+        async function fetchOfficialData(name) {
+            const apiInfo = document.getElementById('apiInfo');
+            const clean = cleanMovieTitle(name);
+            try {
+                const res = await fetch(`https://api.watchmode.com/v1/search/?apiKey=${API_KEY}&search_field=name&search_value=${encodeURIComponent(clean)}`);
+                const d = await res.json();
+                if (d.title_results?.[0]) {
+                    const m = d.title_results[0];
+                    apiInfo.innerHTML = `
+                        <b style="color:#fff; font-size:1rem;">${m.name}</b><br>
+                        Year: ${m.year || 'N/A'}<br>
+                        Format: ${m.type.replace('_', ' ')}
+                    `;
+                } else {
+                    apiInfo.innerHTML = "No additional metadata found.";
+                }
+            } catch (e) { }
+        }
+    </script>
+</body>
+</html>
