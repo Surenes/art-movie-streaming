@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Art Movie Streaming</title>
+    <title>ART Movie Streaming | Private Server</title>
     <style>
         :root {
             --accent: #00d4ff;
@@ -18,17 +18,16 @@
             color: var(--text);
             font-family: var(--font-main);
             margin: 0;
-            /* 70px padding ensures "ART Movie Streaming" is below the status bar clock */
-            padding: 70px 15px 20px 15px;
+            padding: 60px 15px 15px 15px;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* --- BRANDING --- */
+        /* --- HEADER & CONTROLS --- */
         .header-section { text-align: center; margin-bottom: 25px; }
-        .logo { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; }
+        .logo { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: -1px; }
         .logo span { color: var(--accent); font-weight: 300; font-style: italic; }
 
-        /* --- CUSTOM DROPDOWN --- */
         .control-panel {
             background: var(--card);
             padding: 20px;
@@ -36,76 +35,87 @@
             border: 1px solid #1a1a1a;
             max-width: 800px;
             margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .dropdown-container {
-            position: relative;
-            width: 100%;
+        .input-row { display: flex; flex-direction: column; gap: 10px; }
+
+        /* --- CUSTOM DROPDOWN --- */
+        .dropdown { position: relative; flex-grow: 1; text-align: left; }
+        .drop-btn {
             background: #1a1a1a;
-            border-radius: 12px;
             border: 1px solid #333;
             color: white;
+            padding: 14px;
+            border-radius: 12px;
             cursor: pointer;
-        }
-
-        .dropdown-header {
-            padding: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-size: 16px;
         }
-
-        .dropdown-list {
+        .dropdown-content {
             display: none;
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            border-top: 1px solid #333;
-            max-height: 300px;
+            position: absolute;
+            background: #181818;
+            min-width: 100%;
+            border: 1px solid #333;
+            border-radius: 12px;
+            z-index: 1000;
+            max-height: 250px;
             overflow-y: auto;
+            margin-top: 5px;
         }
+        .dropdown-content div { padding: 14px; cursor: pointer; border-bottom: 1px solid #222; }
+        .dropdown-content div:hover { background: var(--accent); color: #000; }
+        .show { display: block; }
 
-        .dropdown-list li {
-            padding: 15px;
-            border-bottom: 1px solid #222;
-        }
-
-        .dropdown-list li:active {
-            background: var(--accent);
-            color: black;
-        }
-
-        .show { display: block !important; }
-
-        /* --- UI ELEMENTS --- */
-        #loadBtn {
+        button#loadBtn {
             background: var(--accent);
             color: black;
             border: none;
-            padding: 14px;
+            padding: 14px 25px;
             border-radius: 12px;
             font-weight: bold;
-            width: 100%;
-            margin-top: 15px;
-            display: none; /* Only shows after selection */
+            cursor: pointer;
+            font-size: 16px;
         }
 
         #movieSearch {
-            margin-top: 15px;
-            display: none;
-            width: 100%;
-            padding: 14px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: white;
-            border-radius: 12px;
-            box-sizing: border-box;
+            background: #1a1a1a; border: 1px solid #333; color: white;
+            padding: 14px; border-radius: 12px; margin-top: 15px;
+            display: none; width: 100%; box-sizing: border-box; outline: none;
         }
 
-        /* --- LIST & PLAYER --- */
-        #videoBox { display: none; width: 100%; background: #000; border-radius: 24px; overflow: hidden; margin-top: 20px; border: 1px solid #222; }
-        video { width: 100%; aspect-ratio: 16/9; }
-        .movie-card { padding: 16px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; }
+        /* --- VIDEO PLAYER --- */
+        #videoBox {
+            display: none; width: 100%; max-width: 1000px;
+            margin: 20px auto; background: #000; border-radius: 24px;
+            overflow: hidden; border: 1px solid #222;
+        }
+        video { width: 100%; aspect-ratio: 16/9; display: block; background: #000; }
+        .player-info { padding: 20px; background: linear-gradient(180deg, #111 0%, #000 100%); }
+        .res-buttons { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .res-buttons button {
+            background: #222; color: #ccc; border: 1px solid #333;
+            padding: 10px 18px; border-radius: 8px; font-size: 0.8rem; flex-shrink: 0;
+        }
+        .res-buttons button.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+        /* --- GRID LAYOUT --- */
+        .main-content { max-width: 1200px; margin: 20px auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
+        .list-container { background: var(--card); border-radius: 20px; padding: 10px; max-height: 50vh; overflow-y: auto; border: 1px solid #1a1a1a; }
+        .movie-card {
+            padding: 15px; border-bottom: 1px solid #1a1a1a; cursor: pointer;
+            display: flex; align-items: center; transition: 0.2s;
+        }
+        .movie-card:hover { background: #1a1a1a; color: var(--accent); }
+        
+        @media (min-width: 900px) {
+            .main-content { grid-template-columns: 1fr 300px; }
+            .input-row { flex-direction: row; }
+        }
+        #statusText { color: #555; font-size: 0.8rem; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
@@ -113,114 +123,197 @@
 <div class="header-section">
     <div class="logo">ART <span>Movie Streaming</span></div>
     <div class="control-panel">
-        <div class="dropdown-container" onclick="toggleDropdown()">
-            <div class="dropdown-header">
-                <span id="selectedLabel">Select Category</span>
-                <span style="color:var(--accent)">▼</span>
+        <div class="input-row">
+            <div class="dropdown">
+                <div class="drop-btn" onclick="toggleDropdown(event)">
+                    <span id="selectedLabel">2024</span><span style="font-size: 0.7rem;">▼</span>
+                </div>
+                <div class="dropdown-content" id="dropContent">
+                    <div onclick="setCat('2026')">2026</div>
+                    <div onclick="setCat('2025')">2025</div>
+                    <div onclick="setCat('2024')">2024</div>
+                    <div onclick="setCat('2023')">2023</div>
+                    <div onclick="setCat('Hollywood collection')">Hollywood collection</div>
+                    <div onclick="setCat('best')">best</div>
+                    <div onclick="setCat('horror')">horror</div>
+                    <div onclick="setCat('random')">random</div>
+                </div>
             </div>
-            <ul class="dropdown-list" id="categoryList">
-                <li onclick="selectCategory('2024')">2024</li>
-                <li onclick="selectCategory('2025')">2025</li>
-                <li onclick="selectCategory('2026')">2026</li>
-                <li onclick="selectCategory('Hollywood collection')">Hollywood collection</li>
-                <li onclick="selectCategory('best')">best</li>
-                <li onclick="selectCategory('best1')">best1</li>
-                <li onclick="selectCategory('horror')">horror</li>
-                <li onclick="selectCategory('random')">random</li>
-                <li onclick="selectCategory('2023')">2023</li>
-                <li onclick="selectCategory('2022')">2022</li>
-            </ul>
+            <button id="loadBtn" onclick="loadYear()">Enter Library</button>
         </div>
-        
-        <button id="loadBtn" onclick="loadMovies()">Enter Library</button>
-        <input type="text" id="movieSearch" onkeyup="filterMovies()" placeholder="Search titles...">
-        <div id="statusText" style="color:#555; font-size:0.8rem; margin-top:10px;">System ready</div>
+        <input type="text" id="movieSearch" onkeyup="filterMovies()" placeholder="Quick search in current category...">
+        <div id="statusText">System Standing By</div>
     </div>
 </div>
 
 <div id="videoBox">
-    <video id="player" controls playsinline></video>
-    <div style="padding:15px">
-        <div id="nowPlaying" style="font-weight:bold; color:white"></div>
+    <video id="player" controls playsinline poster="">
+        Your browser does not support video playback.
+    </video>
+    <div class="player-info">
+        <div id="nowPlaying" style="font-weight: 600; color: #fff; font-size: 1.1rem;"></div>
+        <div class="res-buttons" id="resOptions"></div>
+        <div id="manualHelp" style="margin-top:15px; font-size: 0.8rem; color: #555;"></div>
     </div>
 </div>
 
-<div id="movieGrid"></div>
+<div class="main-content">
+    <div class="list-container"><div id="movieGrid"></div></div>
+    <div id="sidebar" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid #1a1a1a;">
+        <h4 style="color:var(--accent); margin-top:0; font-size: 0.9rem; text-transform: uppercase;">Streaming Meta</h4>
+        <div id="apiInfo" style="color:#777; font-size: 0.85rem; line-height: 1.5;">Select a movie to fetch server details.</div>
+    </div>
+</div>
 
 <script>
-    const API_KEY = 'L8Cwpcbt6L3MN9jI1PmcytHqMn2AB6fZOkAIhB4y';
     const BASE_IP = "http://103.145.232.246/Data/movies/Hollywood/";
-    let currentCategory = "";
-    let cachedMovies = [];
+    let cachedMovieList = [];
+    let currentCat = "2024";
 
-    function toggleDropdown() {
-        document.getElementById('categoryList').classList.toggle('show');
+    // --- UI HANDLERS ---
+    function toggleDropdown(e) {
+        e.stopPropagation();
+        document.getElementById("dropContent").classList.toggle("show");
     }
 
-    function selectCategory(val) {
-        currentCategory = val;
-        document.getElementById('selectedLabel').innerText = val;
-        document.getElementById('loadBtn').style.display = "block";
+    function setCat(val) {
+        currentCat = val;
+        document.getElementById("selectedLabel").innerText = val;
+        document.getElementById("dropContent").classList.remove("show");
+        loadYear();
     }
 
-    async function loadMovies() {
-        const status = document.getElementById('statusText');
-        const targetUrl = `${BASE_IP}${encodeURIComponent(currentCategory)}/`;
-        status.innerText = "Synchronizing...";
-
-        try {
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
-            const doc = new DOMParser().parseFromString(data.contents, 'text/html');
-            const links = Array.from(doc.querySelectorAll('a'))
-                .map(a => a.innerText.replace('/', ''))
-                .filter(n => n && !n.includes('..') && !n.toLowerCase().includes('index'));
-
-            cachedMovies = links;
-            render(links, targetUrl);
-            status.innerText = links.length + " items found.";
-            document.getElementById('movieSearch').style.display = "block";
-        } catch (e) {
-            status.innerText = "Connection failed.";
+    window.onclick = function(e) {
+        if (!e.target.closest('.dropdown')) {
+            document.getElementById("dropContent").classList.remove("show");
         }
     }
 
-    function render(list, baseUrl) {
-        document.getElementById('movieGrid').innerHTML = list.map(name => `
-            <div class="movie-card" onclick="openFolder('${name}', '${baseUrl}${encodeURIComponent(name)}/')">
-                <span style="color:var(--accent); margin-right:15px">●</span>
-                <span>${name}</span>
-            </div>
-        `).join('');
+    // --- CORE LOGIC ---
+    async function fetchServerHTML(url) {
+        // We try two different proxies for better reliability
+        const proxies = [
+            `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+            `https://corsproxy.io/?${encodeURIComponent(url)}`
+        ];
+
+        for (let proxy of proxies) {
+            try {
+                const response = await fetch(proxy);
+                const data = await response.json();
+                // Handle different proxy response formats
+                return data.contents || data; 
+            } catch (err) {
+                console.warn("Proxy failed, trying next...");
+            }
+        }
+        throw new Error("All proxies failed");
     }
 
-    async function openFolder(name, url) {
-        const vBox = document.getElementById('videoBox');
-        vBox.style.display = "block";
-        vBox.scrollIntoView({ behavior: 'smooth' });
-        document.getElementById('nowPlaying').innerText = "Loading: " + name;
-
+    async function loadYear() {
+        const status = document.getElementById('statusText');
+        const targetUrl = `${BASE_IP}${encodeURIComponent(currentCat)}/`;
+        status.innerText = `Connecting to ${currentCat} index...`;
+        
         try {
-            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-            const res = await fetch(proxy);
-            const data = await res.json();
-            const doc = new DOMParser().parseFromString(data.contents, 'text/html');
-            const video = Array.from(doc.querySelectorAll('a'))
-                .find(l => l.href.toLowerCase().endsWith('.mp4') || l.href.toLowerCase().endsWith('.mkv'));
+            const html = await fetchServerHTML(targetUrl);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const links = Array.from(doc.querySelectorAll('a'))
+                .map(a => a.innerText.trim())
+                .filter(name => name && !name.includes('../') && !name.toLowerCase().includes('parent'));
+            
+            cachedMovieList = links;
+            renderList(links, targetUrl);
+            status.innerText = `SUCCESS: ${links.length} titles indexed.`;
+            document.getElementById('movieSearch').style.display = "block";
+        } catch (e) {
+            status.innerText = "ERROR: Could not reach server. Check your internet or CORS status.";
+        }
+    }
 
-            if (video) {
-                const player = document.getElementById('player');
-                player.src = url + video.getAttribute('href');
-                player.play();
-            }
-        } catch (e) {}
+    function renderList(list, baseUrl) {
+        const grid = document.getElementById('movieGrid');
+        grid.innerHTML = list.map(name => {
+            const cleanName = name.replace(/\/$/, ""); // Remove trailing slash for display
+            return `
+                <div class="movie-card" onclick="openFolder('${cleanName}', '${baseUrl}${encodeURIComponent(name)}')">
+                    <span style="margin-right:12px; color:var(--accent); font-size: 0.6rem;">▶</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</span>
+                </div>
+            `;
+        }).join('');
     }
 
     function filterMovies() {
-        const q = document.getElementById('movieSearch').value.toLowerCase();
-        const filtered = cachedMovies.filter(m => m.toLowerCase().includes(q));
-        render(filtered, `${BASE_IP}${currentCategory}/`);
+        const query = document.getElementById('movieSearch').value.toLowerCase();
+        const filtered = cachedMovieList.filter(m => m.toLowerCase().includes(query));
+        renderList(filtered, `${BASE_IP}${encodeURIComponent(currentCat)}/`);
+    }
+
+    async function openFolder(folderName, folderUrl) {
+        const videoBox = document.getElementById('videoBox');
+        const resOptions = document.getElementById('resOptions');
+        const nowPlaying = document.getElementById('nowPlaying');
+        
+        videoBox.style.display = "block";
+        videoBox.scrollIntoView({ behavior: 'smooth' });
+        resOptions.innerHTML = "Scanning for video streams...";
+        nowPlaying.innerText = folderName;
+
+        try {
+            const html = await fetchServerHTML(folderUrl);
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const files = Array.from(doc.querySelectorAll('a')).filter(l => {
+                const h = l.getAttribute('href').toLowerCase();
+                return h.endsWith('.mp4') || h.endsWith('.mkv') || h.endsWith('.webm');
+            });
+
+            if (files.length === 0) {
+                resOptions.innerHTML = "No playable video files found in this directory.";
+                return;
+            }
+
+            resOptions.innerHTML = "";
+            files.forEach((file, i) => {
+                const fHref = file.getAttribute('href');
+                // Ensure proper URL joining
+                const finalUrl = folderUrl + (folderUrl.endsWith('/') ? '' : '/') + fHref;
+                
+                const btn = document.createElement('button');
+                btn.innerText = fHref.includes('1080') ? "FHD 1080p" : (fHref.includes('720') ? "HD 720p" : `Stream ${i+1}`);
+                btn.onclick = () => playVideo(finalUrl, fHref, btn);
+                resOptions.appendChild(btn);
+                
+                // Auto-play the first one found
+                if(i === 0) playVideo(finalUrl, fHref, btn);
+            });
+        } catch (e) {
+            resOptions.innerHTML = "Error retrieving folder content.";
+        }
+    }
+
+    function playVideo(url, fileName, btn) {
+        const player = document.getElementById('player');
+        const manual = document.getElementById('manualHelp');
+        
+        player.src = url;
+        player.load();
+        
+        const playPromise = player.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                manual.innerHTML = `⚠️ Playback blocked? <a href="${url}" target="_blank" style="color:var(--accent)">Click here to open raw file</a>`;
+            });
+        }
+
+        document.querySelectorAll('.res-buttons button').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        
+        document.getElementById('apiInfo').innerHTML = `
+            <b style="color:#fff">File Name:</b><br>${fileName}<br><br>
+            <b style="color:#fff">Direct Link:</b><br><span style="word-break:break-all; font-size:10px;">${url}</span>
+        `;
     }
 </script>
 </body>
