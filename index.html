@@ -18,22 +18,17 @@
             color: var(--text);
             font-family: var(--font-main);
             margin: 0;
-            /* Extra top padding so the clock doesn't cover the title */
-            padding: 60px 15px 15px 15px; 
-            box-sizing: border-box;
+            /* 70px padding ensures "ART Movie Streaming" is below the status bar clock */
+            padding: 70px 15px 20px 15px;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        /* --- BRANDING --- */
         .header-section { text-align: center; margin-bottom: 25px; }
-
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-        }
-
+        .logo { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; }
         .logo span { color: var(--accent); font-weight: 300; font-style: italic; }
 
+        /* --- CUSTOM DROPDOWN --- */
         .control-panel {
             background: var(--card);
             padding: 20px;
@@ -43,21 +38,47 @@
             margin: 0 auto;
         }
 
-        /* Styling the Dropdown Box */
-        select {
+        .dropdown-container {
+            position: relative;
+            width: 100%;
             background: #1a1a1a;
+            border-radius: 12px;
             border: 1px solid #333;
             color: white;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            outline: none;
             cursor: pointer;
-            margin-bottom: 10px;
-            width: 100%;
         }
 
-        button {
+        .dropdown-header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-list {
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            border-top: 1px solid #333;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .dropdown-list li {
+            padding: 15px;
+            border-bottom: 1px solid #222;
+        }
+
+        .dropdown-list li:active {
+            background: var(--accent);
+            color: black;
+        }
+
+        .show { display: block !important; }
+
+        /* --- UI ELEMENTS --- */
+        #loadBtn {
             background: var(--accent);
             color: black;
             border: none;
@@ -65,21 +86,26 @@
             border-radius: 12px;
             font-weight: bold;
             width: 100%;
-            font-size: 16px;
+            margin-top: 15px;
+            display: none; /* Only shows after selection */
         }
 
-        #movieSearch { margin-top: 15px; display: none; width: 100%; padding: 12px; background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 10px; }
-
-        /* Content List */
-        .movie-card {
-            padding: 16px;
-            border-bottom: 1px solid #1a1a1a;
-            display: flex;
-            align-items: center;
+        #movieSearch {
+            margin-top: 15px;
+            display: none;
+            width: 100%;
+            padding: 14px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 12px;
+            box-sizing: border-box;
         }
 
-        #videoBox { display: none; width: 100%; background: #000; border-radius: 20px; overflow: hidden; margin: 20px 0; }
+        /* --- LIST & PLAYER --- */
+        #videoBox { display: none; width: 100%; background: #000; border-radius: 24px; overflow: hidden; margin-top: 20px; border: 1px solid #222; }
         video { width: 100%; aspect-ratio: 16/9; }
+        .movie-card { padding: 16px; border-bottom: 1px solid #1a1a1a; display: flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -87,30 +113,36 @@
 <div class="header-section">
     <div class="logo">ART <span>Movie Streaming</span></div>
     <div class="control-panel">
-        <select id="categorySelect">
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-            <option value="Hollywood collection">Hollywood Collection</option>
-            <option value="best">Best</option>
-            <option value="best1">Best 1</option>
-            <option value="horror">Horror</option>
-            <option value="random">Random</option>
-            <option value="2023">2023</option>
-            <option value="2022">2022</option>
-            <option value="2021">2021</option>
-            <option value="2020">2020</option>
-        </select>
-        <button onclick="loadCategory()">Explore Library</button>
-        <input type="text" id="movieSearch" onkeyup="filterMovies()" placeholder="Search in this category...">
-        <div id="statusText" style="color: #555; font-size: 0.8rem; margin-top: 10px;">Ready</div>
+        <div class="dropdown-container" onclick="toggleDropdown()">
+            <div class="dropdown-header">
+                <span id="selectedLabel">Select Category</span>
+                <span style="color:var(--accent)">▼</span>
+            </div>
+            <ul class="dropdown-list" id="categoryList">
+                <li onclick="selectCategory('2024')">2024</li>
+                <li onclick="selectCategory('2025')">2025</li>
+                <li onclick="selectCategory('2026')">2026</li>
+                <li onclick="selectCategory('Hollywood collection')">Hollywood collection</li>
+                <li onclick="selectCategory('best')">best</li>
+                <li onclick="selectCategory('best1')">best1</li>
+                <li onclick="selectCategory('horror')">horror</li>
+                <li onclick="selectCategory('random')">random</li>
+                <li onclick="selectCategory('2023')">2023</li>
+                <li onclick="selectCategory('2022')">2022</li>
+            </ul>
+        </div>
+        
+        <button id="loadBtn" onclick="loadMovies()">Enter Library</button>
+        <input type="text" id="movieSearch" onkeyup="filterMovies()" placeholder="Search titles...">
+        <div id="statusText" style="color:#555; font-size:0.8rem; margin-top:10px;">System ready</div>
     </div>
 </div>
 
 <div id="videoBox">
     <video id="player" controls playsinline></video>
-    <div id="nowPlaying" style="padding: 15px; font-weight: bold;"></div>
-    <div id="resOptions" style="padding: 0 15px 15px 15px; display: flex; gap: 10px;"></div>
+    <div style="padding:15px">
+        <div id="nowPlaying" style="font-weight:bold; color:white"></div>
+    </div>
 </div>
 
 <div id="movieGrid"></div>
@@ -118,13 +150,23 @@
 <script>
     const API_KEY = 'L8Cwpcbt6L3MN9jI1PmcytHqMn2AB6fZOkAIhB4y';
     const BASE_IP = "http://103.145.232.246/Data/movies/Hollywood/";
-    let cachedMovieList = [];
+    let currentCategory = "";
+    let cachedMovies = [];
 
-    async function loadCategory() {
-        const category = document.getElementById('categorySelect').value;
-        const targetUrl = `${BASE_IP}${encodeURIComponent(category)}/`;
+    function toggleDropdown() {
+        document.getElementById('categoryList').classList.toggle('show');
+    }
+
+    function selectCategory(val) {
+        currentCategory = val;
+        document.getElementById('selectedLabel').innerText = val;
+        document.getElementById('loadBtn').style.display = "block";
+    }
+
+    async function loadMovies() {
         const status = document.getElementById('statusText');
-        status.innerText = "Connecting to " + category + "...";
+        const targetUrl = `${BASE_IP}${encodeURIComponent(currentCategory)}/`;
+        status.innerText = "Synchronizing...";
 
         try {
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
@@ -132,53 +174,53 @@
             const data = await response.json();
             const doc = new DOMParser().parseFromString(data.contents, 'text/html');
             const links = Array.from(doc.querySelectorAll('a'))
-                .map(a => a.innerText.replace('/', '')) // Remove the slash from folder names
-                .filter(name => name && !name.includes('..') && !name.toLowerCase().includes('index'));
+                .map(a => a.innerText.replace('/', ''))
+                .filter(n => n && !n.includes('..') && !n.toLowerCase().includes('index'));
 
-            cachedMovieList = links;
-            renderList(links, targetUrl);
-            status.innerText = links.length + " movies found.";
+            cachedMovies = links;
+            render(links, targetUrl);
+            status.innerText = links.length + " items found.";
             document.getElementById('movieSearch').style.display = "block";
         } catch (e) {
-            status.innerText = "Error loading category.";
+            status.innerText = "Connection failed.";
         }
     }
 
-    function renderList(list, baseUrl) {
-        const grid = document.getElementById('movieGrid');
-        grid.innerHTML = list.map(name => `
+    function render(list, baseUrl) {
+        document.getElementById('movieGrid').innerHTML = list.map(name => `
             <div class="movie-card" onclick="openFolder('${name}', '${baseUrl}${encodeURIComponent(name)}/')">
-                <span style="color:var(--accent); margin-right: 10px;">▶</span>
+                <span style="color:var(--accent); margin-right:15px">●</span>
                 <span>${name}</span>
             </div>
         `).join('');
     }
 
-    // ... (Keep existing openFolder, playVideo, and fetchOfficialData functions) ...
-    async function openFolder(folderName, folderUrl) {
-        const videoBox = document.getElementById('videoBox');
-        videoBox.style.display = "block";
-        videoBox.scrollIntoView({ behavior: 'smooth' });
-        
+    async function openFolder(name, url) {
+        const vBox = document.getElementById('videoBox');
+        vBox.style.display = "block";
+        vBox.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById('nowPlaying').innerText = "Loading: " + name;
+
         try {
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(folderUrl)}`;
-            const response = await fetch(proxyUrl);
-            const data = await response.json();
+            const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+            const res = await fetch(proxy);
+            const data = await res.json();
             const doc = new DOMParser().parseFromString(data.contents, 'text/html');
-            const videoLink = Array.from(doc.querySelectorAll('a'))
+            const video = Array.from(doc.querySelectorAll('a'))
                 .find(l => l.href.toLowerCase().endsWith('.mp4') || l.href.toLowerCase().endsWith('.mkv'));
 
-            if (videoLink) {
-                playVideo(folderUrl + videoLink.getAttribute('href'), folderName);
+            if (video) {
+                const player = document.getElementById('player');
+                player.src = url + video.getAttribute('href');
+                player.play();
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {}
     }
 
-    function playVideo(url, name) {
-        const player = document.getElementById('player');
-        player.src = url;
-        player.play();
-        document.getElementById('nowPlaying').innerText = "Watching: " + name;
+    function filterMovies() {
+        const q = document.getElementById('movieSearch').value.toLowerCase();
+        const filtered = cachedMovies.filter(m => m.toLowerCase().includes(q));
+        render(filtered, `${BASE_IP}${currentCategory}/`);
     }
 </script>
 </body>
