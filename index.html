@@ -3,317 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ART Movie Streaming | Private Server</title>
+    <title>ART Cinema v2</title>
     <style>
-        :root {
-            --accent: #00d4ff;
-            --bg: #050505;
-            --card: #121212;
-            --text: #ffffff;
-            --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: var(--font-main);
-            margin: 0;
-            padding: 60px 15px 15px 15px;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* --- HEADER & CONTROLS --- */
-        .header-section { text-align: center; margin-bottom: 25px; }
-        .logo { font-size: 1.8rem; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; letter-spacing: -1px; }
-        .logo span { color: var(--accent); font-weight: 300; font-style: italic; }
-
-        .control-panel {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 20px;
-            border: 1px solid #1a1a1a;
-            max-width: 800px;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .input-row { display: flex; flex-direction: column; gap: 10px; }
-
-        /* --- CUSTOM DROPDOWN --- */
-        .dropdown { position: relative; flex-grow: 1; text-align: left; }
-        .drop-btn {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            color: white;
-            padding: 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 16px;
-        }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background: #181818;
-            min-width: 100%;
-            border: 1px solid #333;
-            border-radius: 12px;
-            z-index: 1000;
-            max-height: 250px;
-            overflow-y: auto;
-            margin-top: 5px;
-        }
-        .dropdown-content div { padding: 14px; cursor: pointer; border-bottom: 1px solid #222; }
-        .dropdown-content div:hover { background: var(--accent); color: #000; }
-        .show { display: block; }
-
-        button#loadBtn {
-            background: var(--accent);
-            color: black;
-            border: none;
-            padding: 14px 25px;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        #movieSearch {
-            background: #1a1a1a; border: 1px solid #333; color: white;
-            padding: 14px; border-radius: 12px; margin-top: 15px;
-            display: none; width: 100%; box-sizing: border-box; outline: none;
-        }
-
-        /* --- VIDEO PLAYER --- */
-        #videoBox {
-            display: none; width: 100%; max-width: 1000px;
-            margin: 20px auto; background: #000; border-radius: 24px;
-            overflow: hidden; border: 1px solid #222;
-        }
-        video { width: 100%; aspect-ratio: 16/9; display: block; background: #000; }
-        .player-info { padding: 20px; background: linear-gradient(180deg, #111 0%, #000 100%); }
-        .res-buttons { display: flex; gap: 10px; margin-top: 15px; overflow-x: auto; padding-bottom: 10px; }
-        .res-buttons button {
-            background: #222; color: #ccc; border: 1px solid #333;
-            padding: 10px 18px; border-radius: 8px; font-size: 0.8rem; flex-shrink: 0;
-        }
-        .res-buttons button.active { background: var(--accent); color: #000; border-color: var(--accent); }
-
-        /* --- GRID LAYOUT --- */
-        .main-content { max-width: 1200px; margin: 20px auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
-        .list-container { background: var(--card); border-radius: 20px; padding: 10px; max-height: 50vh; overflow-y: auto; border: 1px solid #1a1a1a; }
-        .movie-card {
-            padding: 15px; border-bottom: 1px solid #1a1a1a; cursor: pointer;
-            display: flex; align-items: center; transition: 0.2s;
-        }
-        .movie-card:hover { background: #1a1a1a; color: var(--accent); }
+        :root { --primary: #e50914; --bg: #0b0b0b; --card: #1a1a1a; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
         
-        @media (min-width: 900px) {
-            .main-content { grid-template-columns: 1fr 300px; }
-            .input-row { flex-direction: row; }
-        }
-        #statusText { color: #555; font-size: 0.8rem; margin-top: 10px; text-align: center; }
+        /* Premium Header */
+        header { padding: 25px; text-align: center; background: linear-gradient(to bottom, #141414, transparent); }
+        .logo { font-size: 28px; font-weight: 900; color: var(--primary); letter-spacing: 2px; margin-bottom: 20px; }
+
+        /* Search Bar */
+        .search-box { position: relative; width: 90%; max-width: 500px; margin: 0 auto; }
+        input { width: 100%; padding: 15px 20px; border-radius: 30px; border: 1px solid #333; background: rgba(255,255,255,0.1); color: white; outline: none; box-sizing: border-box; font-size: 16px; }
+        input:focus { border-color: var(--primary); background: rgba(255,255,255,0.15); }
+
+        /* Player Section */
+        #player-container { display: none; width: 100%; background: #000; position: sticky; top: 0; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        iframe { width: 100%; aspect-ratio: 16/9; border: none; }
+        .close-player { padding: 10px; text-align: center; background: #222; font-size: 12px; cursor: pointer; color: #aaa; }
+
+        /* Results Grid */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; padding: 20px; }
+        .movie-card { background: var(--card); border-radius: 8px; overflow: hidden; transition: 0.3s; position: relative; }
+        .movie-card:active { transform: scale(0.95); }
+        .poster { width: 100%; aspect-ratio: 2/3; background: #222; object-fit: cover; }
+        .info { padding: 8px; font-size: 11px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .type-badge { position: absolute; top: 5px; right: 5px; background: var(--primary); font-size: 8px; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="header-section">
-    <div class="logo">ART <span>Movie Streaming</span></div>
-    <div class="control-panel">
-        <div class="input-row">
-            <div class="dropdown">
-                <div class="drop-btn" onclick="toggleDropdown(event)">
-                    <span id="selectedLabel">2024</span><span style="font-size: 0.7rem;">▼</span>
-                </div>
-                <div class="dropdown-content" id="dropContent">
-                    <div onclick="setCat('2026')">2026</div>
-                    <div onclick="setCat('2025')">2025</div>
-                    <div onclick="setCat('2024')">2024</div>
-                    <div onclick="setCat('2023')">2023</div>
-                    <div onclick="setCat('Hollywood collection')">Hollywood collection</div>
-                    <div onclick="setCat('best')">best</div>
-                    <div onclick="setCat('horror')">horror</div>
-                    <div onclick="setCat('random')">random</div>
-                </div>
-            </div>
-            <button id="loadBtn" onclick="loadYear()">Enter Library</button>
-        </div>
-        <input type="text" id="movieSearch" onkeyup="filterMovies()" placeholder="Quick search in current category...">
-        <div id="statusText">System Standing By</div>
-    </div>
+<div id="player-container">
+    <div class="close-player" onclick="closePlayer()">✖ CLOSE PLAYER</div>
+    <iframe id="video-frame" src="" allowfullscreen></iframe>
 </div>
 
-<div id="videoBox">
-    <video id="player" controls playsinline poster="">
-        Your browser does not support video playback.
-    </video>
-    <div class="player-info">
-        <div id="nowPlaying" style="font-weight: 600; color: #fff; font-size: 1.1rem;"></div>
-        <div class="res-buttons" id="resOptions"></div>
-        <div id="manualHelp" style="margin-top:15px; font-size: 0.8rem; color: #555;"></div>
+<header>
+    <div class="logo">ART CINEMA</div>
+    <div class="search-box">
+        <input type="text" id="query" placeholder="Search Movies or TV Shows..." onkeyup="if(event.key==='Enter')search()">
     </div>
-</div>
+</header>
 
-<div class="main-content">
-    <div class="list-container"><div id="movieGrid"></div></div>
-    <div id="sidebar" style="background:var(--card); padding:20px; border-radius:20px; border:1px solid #1a1a1a;">
-        <h4 style="color:var(--accent); margin-top:0; font-size: 0.9rem; text-transform: uppercase;">Streaming Meta</h4>
-        <div id="apiInfo" style="color:#777; font-size: 0.85rem; line-height: 1.5;">Select a movie to fetch server details.</div>
+<div class="grid" id="results">
     </div>
-</div>
 
 <script>
-    const BASE_IP = "http://103.145.232.246/Data/movies/Hollywood/";
-    let cachedMovieList = [];
-    let currentCat = "2024";
+    // Note: To get posters, we use TMDB. The player comes from nepu.to
+    const TMDB_KEY = "8d6d9194546435662aa445a54e141c25"; // Public API Key for testing
 
-    // --- UI HANDLERS ---
-    function toggleDropdown(e) {
-        e.stopPropagation();
-        document.getElementById("dropContent").classList.toggle("show");
-    }
+    async function search() {
+        const query = document.getElementById('query').value;
+        const grid = document.getElementById('results');
+        if(query.length < 2) return;
 
-    function setCat(val) {
-        currentCat = val;
-        document.getElementById("selectedLabel").innerText = val;
-        document.getElementById("dropContent").classList.remove("show");
-        loadYear();
-    }
+        grid.innerHTML = "<p style='text-align:center; width:100%;'>Searching...</p>";
 
-    window.onclick = function(e) {
-        if (!e.target.closest('.dropdown')) {
-            document.getElementById("dropContent").classList.remove("show");
-        }
-    }
-
-    // --- CORE LOGIC ---
-    async function fetchServerHTML(url) {
-        // We try two different proxies for better reliability
-        const proxies = [
-            `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-            `https://corsproxy.io/?${encodeURIComponent(url)}`
-        ];
-
-        for (let proxy of proxies) {
-            try {
-                const response = await fetch(proxy);
-                const data = await response.json();
-                // Handle different proxy response formats
-                return data.contents || data; 
-            } catch (err) {
-                console.warn("Proxy failed, trying next...");
-            }
-        }
-        throw new Error("All proxies failed");
-    }
-
-    async function loadYear() {
-        const status = document.getElementById('statusText');
-        const targetUrl = `${BASE_IP}${encodeURIComponent(currentCat)}/`;
-        status.innerText = `Connecting to ${currentCat} index...`;
-        
         try {
-            const html = await fetchServerHTML(targetUrl);
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const links = Array.from(doc.querySelectorAll('a'))
-                .map(a => a.innerText.trim())
-                .filter(name => name && !name.includes('../') && !name.toLowerCase().includes('parent'));
+            const resp = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(query)}`);
+            const data = await resp.json();
             
-            cachedMovieList = links;
-            renderList(links, targetUrl);
-            status.innerText = `SUCCESS: ${links.length} titles indexed.`;
-            document.getElementById('movieSearch').style.display = "block";
-        } catch (e) {
-            status.innerText = "ERROR: Could not reach server. Check your internet or CORS status.";
+            grid.innerHTML = data.results.map(item => {
+                if(!item.poster_path) return '';
+                const title = item.title || item.name;
+                const type = item.media_type; // 'movie' or 'tv'
+                return `
+                    <div class="movie-card" onclick="playContent('${type}', '${item.id}')">
+                        <div class="type-badge">${type.toUpperCase()}</div>
+                        <img class="poster" src="https://image.tmdb.org/t/p/w200${item.poster_path}">
+                        <div class="info">${title}</div>
+                    </div>
+                `;
+            }).join('');
+        } catch(e) {
+            grid.innerHTML = "Search failed. Check internet.";
         }
     }
 
-    function renderList(list, baseUrl) {
-        const grid = document.getElementById('movieGrid');
-        grid.innerHTML = list.map(name => {
-            const cleanName = name.replace(/\/$/, ""); // Remove trailing slash for display
-            return `
-                <div class="movie-card" onclick="openFolder('${cleanName}', '${baseUrl}${encodeURIComponent(name)}')">
-                    <span style="margin-right:12px; color:var(--accent); font-size: 0.6rem;">▶</span>
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${cleanName}</span>
-                </div>
-            `;
-        }).join('');
-    }
-
-    function filterMovies() {
-        const query = document.getElementById('movieSearch').value.toLowerCase();
-        const filtered = cachedMovieList.filter(m => m.toLowerCase().includes(query));
-        renderList(filtered, `${BASE_IP}${encodeURIComponent(currentCat)}/`);
-    }
-
-    async function openFolder(folderName, folderUrl) {
-        const videoBox = document.getElementById('videoBox');
-        const resOptions = document.getElementById('resOptions');
-        const nowPlaying = document.getElementById('nowPlaying');
+    function playContent(type, id) {
+        const container = document.getElementById('player-container');
+        const frame = document.getElementById('video-frame');
         
-        videoBox.style.display = "block";
-        videoBox.scrollIntoView({ behavior: 'smooth' });
-        resOptions.innerHTML = "Scanning for video streams...";
-        nowPlaying.innerText = folderName;
-
-        try {
-            const html = await fetchServerHTML(folderUrl);
-            const doc = new DOMParser().parseFromString(html, 'text/html');
-            const files = Array.from(doc.querySelectorAll('a')).filter(l => {
-                const h = l.getAttribute('href').toLowerCase();
-                return h.endsWith('.mp4') || h.endsWith('.mkv') || h.endsWith('.webm');
-            });
-
-            if (files.length === 0) {
-                resOptions.innerHTML = "No playable video files found in this directory.";
-                return;
-            }
-
-            resOptions.innerHTML = "";
-            files.forEach((file, i) => {
-                const fHref = file.getAttribute('href');
-                // Ensure proper URL joining
-                const finalUrl = folderUrl + (folderUrl.endsWith('/') ? '' : '/') + fHref;
-                
-                const btn = document.createElement('button');
-                btn.innerText = fHref.includes('1080') ? "FHD 1080p" : (fHref.includes('720') ? "HD 720p" : `Stream ${i+1}`);
-                btn.onclick = () => playVideo(finalUrl, fHref, btn);
-                resOptions.appendChild(btn);
-                
-                // Auto-play the first one found
-                if(i === 0) playVideo(finalUrl, fHref, btn);
-            });
-        } catch (e) {
-            resOptions.innerHTML = "Error retrieving folder content.";
-        }
-    }
-
-    function playVideo(url, fileName, btn) {
-        const player = document.getElementById('player');
-        const manual = document.getElementById('manualHelp');
-        
-        player.src = url;
-        player.load();
-        
-        const playPromise = player.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(error => {
-                manual.innerHTML = `⚠️ Playback blocked? <a href="${url}" target="_blank" style="color:var(--accent)">Click here to open raw file</a>`;
-            });
+        // Nepu.to Embed Structure
+        // Movies: https://nepu.to/embed/movie/ID
+        // TV: https://nepu.to/embed/tv/ID/1/1 (Default to Season 1 Episode 1)
+        let embedUrl = "";
+        if(type === 'movie') {
+            embedUrl = `https://nepu.to/embed/movie/${id}`;
+        } else {
+            embedUrl = `https://nepu.to/embed/tv/${id}/1/1`;
         }
 
-        document.querySelectorAll('.res-buttons button').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
-        
-        document.getElementById('apiInfo').innerHTML = `
-            <b style="color:#fff">File Name:</b><br>${fileName}<br><br>
-            <b style="color:#fff">Direct Link:</b><br><span style="word-break:break-all; font-size:10px;">${url}</span>
-        `;
+        frame.src = embedUrl;
+        container.style.display = "block";
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function closePlayer() {
+        const container = document.getElementById('player-container');
+        const frame = document.getElementById('video-frame');
+        frame.src = "";
+        container.style.display = "none";
     }
 </script>
 </body>
